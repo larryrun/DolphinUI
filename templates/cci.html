@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>CCI</title>
+    <style>
+        form span {
+            margin-left: 10px;
+        }
+        #valueInput {
+            text-align: right;
+        }
+        #errorMsg {
+            color: red;
+        }
+        #resultTable {
+            border-collapse: collapse;
+        }
+        #resultTable td {
+            border: 1px solid;
+            padding: 4px 10px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+<form style="display: flex; justify-content: flex-start;" method="post" action="cci.html">
+    <span>
+        <label for="indicatorName">
+            指标:
+        </label>
+        <select id="indicatorName" name="name">
+            {% for name in names %}
+            {% if name == selectedName %}
+                <option value="{{name}}" selected="selected">{{name}}</option>
+            {% else %}
+                <option value="{{name}}">{{name}}</option>
+            {% endif %}
+            {% endfor %}
+        </select>
+    </span>
+    <span>
+        <label for="dateInput">
+            日期>=:
+        </label>
+        <input id="dateInput" type="text" name="date" value="{{selectedDate}}">
+    </span>
+    <span>
+        <label for="valueInput">
+            数值>=:
+        </label>
+        <input id="valueInput" type="text" name="value" value="{{selectedValue}}">
+    </span>
+    <span>
+        <input id="submit" type="submit" value="提交">
+    </span>
+</form>
+<div id="errorMsg">{{msg}}</div>
+<table id="resultTable">
+    <thead>
+    <tr>
+        <th>代码</th><th>日期</th><th>值</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for row in result %}
+    <tr>
+        <td>{{row.code}}</td>
+        <td>{{row.date}}</td>
+        <td>{{row.value}}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+
+</table>
+</body>
+</html>
