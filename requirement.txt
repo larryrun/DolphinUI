@@ -9,3 +9,4 @@ protobuf==3.14.0
 PyMySQL==1.0.2
 six==1.15.0
 Werkzeug==1.0.1
+pandas=0.25.3
