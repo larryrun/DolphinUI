@@ -48,18 +48,26 @@ function on_strategy_cci_submit() {
                 </span>
                 <br>
                 <span>
-                    <label for="strategy_cci_weekly"> 周线CCI >=</label>
-                    <input id="strategy_cci_weekly" type="text" name="strategy_cci_weekly" value="{{strategy_cci_weekly}}">
+                    <input id="strategy_cci_daily_min" type="text" name="strategy_cci_daily_min" value="{{strategy_cci_daily_min}}">
+                    <label> <= (日线CCI) <= </label>
+                    <input id="strategy_cci_daily_max" type="text" name="strategy_cci_daily_max" value="{{strategy_cci_daily_max}}">
                 </span>
                 <br>
                 <span>
-                    <label for="strategy_cci_monthly"> 月线CCI >=</label>
-                    <input id="strategy_cci_monthly" type="text" name="strategy_cci_monthly" value="{{strategy_cci_monthly}}">
+                    <input id="strategy_cci_weekly_min" type="text" name="strategy_cci_weekly_min" value="{{strategy_cci_weekly_min}}">
+                    <label> <= (周线CCI) <= </label>
+                    <input id="strategy_cci_weekly_max" type="text" name="strategy_cci_weekly_max" value="{{strategy_cci_weekly_max}}">
                 </span>
                 <br>
                 <span>
-                    <label for="strategy_cci_both_satisfy"> 同时满足 </label>
-                    <input id="strategy_cci_both_satisfy" type="checkbox" name="strategy_cci_both_satisfy" value="{{strategy_cci_both_satisfy}}" checked>
+                    <input id="strategy_cci_monthly_min" type="text" name="strategy_cci_monthly_min" value="{{strategy_cci_monthly_min}}">
+                    <label> <= (月线CCI) <= </label>
+                    <input id="strategy_cci_monthly_max" type="text" name="strategy_cci_monthly_max" value="{{strategy_cci_monthly_max}}">
+                </span>
+                <br>
+                <span>
+                    <label for="strategy_cci_all_satisfy"> 同时满足 </label>
+                    <input id="strategy_cci_all_satisfy" type="checkbox" name="strategy_cci_all_satisfy" value="{{strategy_cci_all_satisfy}}" checked>
                 </span>
             </form>
         </td>
