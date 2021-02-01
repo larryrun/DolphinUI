@@ -28,7 +28,16 @@ def vip_dshj():
                            strategy_cci_weekly_max=380,
                            strategy_cci_monthly='on',
                            strategy_cci_monthly_min=100,
-                           strategy_cci_monthly_max=380)
+                           strategy_cci_monthly_max=380,
+                           roe='on',
+                           roe_min=5,
+                           roe_max='',
+                           tr_yoy='on',
+                           tr_yoy_min=5,
+                           tr_yoy_max='',
+                           netprofit_yoy='on',
+                           netprofit_yoy_min=5,
+                           netprofit_yoy_max='')
 
 
 @app.route('/vip/dshj_cci', methods=['GET', 'POST'])
@@ -47,6 +56,17 @@ def vip_dshj_cci():
         monthly_cci = ("on" == request.form.get('strategy_cci_monthly', ""))
         monthly_cci_min = request.form.get('strategy_cci_monthly_min', None)
         monthly_cci_max = request.form.get('strategy_cci_monthly_max', None)
+
+        roe = ("on" == request.form.get('roe', ""))
+        roe_min = request.form.get('roe_min', None)
+        roe_max = request.form.get('roe_max', None)
+        tr_yoy = ("on" == request.form.get('tr_yoy', ""))
+        tr_yoy_min = request.form.get('tr_yoy_min', None)
+        tr_yoy_max = request.form.get('tr_yoy_max', None)
+        netprofit_yoy = ("on" == request.form.get('netprofit_yoy', ""))
+        netprofit_yoy_min = request.form.get('netprofit_yoy_min', None)
+        netprofit_yoy_max = request.form.get('netprofit_yoy_max', None)
+
         all_satisfy = ("yes" == request.form.get('strategy_cci_all_satisfy', ""))
         start_date = request.form.get('strategy_cci_date', None)
 
@@ -63,6 +83,15 @@ def vip_dshj_cci():
                                         'monthly_cci': monthly_cci,
                                         'monthly_cci_min': monthly_cci_min,
                                         'monthly_cci_max': monthly_cci_max,
+                                        'roe': roe,
+                                        'roe_min': roe_min,
+                                        'roe_max': roe_max,
+                                        'tr_yoy': tr_yoy,
+                                        'tr_yoy_min': tr_yoy_min,
+                                        'tr_yoy_max': tr_yoy_max,
+                                        'netprofit_yoy': netprofit_yoy,
+                                        'netprofit_yoy_min': netprofit_yoy_min,
+                                        'netprofit_yoy_max': netprofit_yoy_max,
                                         'all_satisfy': all_satisfy,
                                         'start_date': start_date
                                     })]})
@@ -102,6 +131,33 @@ def vip_dshj_cci():
             sub_new_stocks = pd.read_sql_query(sql, database_client.get_engine())
             sub_new_stocks.set_index('code', inplace=True)
 
+            basic_indicators_stocks = pd.DataFrame()
+            basic_indicators = roe or tr_yoy or netprofit_yoy
+            if basic_indicators:
+                sql = "SELECT a.code, a.end_date, a.roe, a.tr_yoy, a.netprofit_yoy " \
+                      "FROM Dolphin.FinanceIndicators a, " \
+                      "  (SELECT code, max(end_date) AS end_date FROM Dolphin.FinanceIndicators GROUP BY CODE) AS b " \
+                      "WHERE a.code = b.code AND a.end_date = b.end_date"
+                basic_indicators_stocks = pd.read_sql_query(sql, database_client.get_engine())
+                basic_indicators_stocks.set_index('code', inplace=True, drop=True)
+                if roe:
+                    if roe_min:
+                        basic_indicators_stocks = basic_indicators_stocks.query("roe >= %s" % roe_min)
+                    if roe_max:
+                        basic_indicators_stocks = basic_indicators_stocks.query("roe <= %s" % roe_max)
+                if tr_yoy:
+                    if tr_yoy_min:
+                        basic_indicators_stocks = basic_indicators_stocks.query("tr_yoy >= %s" % tr_yoy_min)
+                    if tr_yoy_max:
+                        basic_indicators_stocks = basic_indicators_stocks.query("tr_yoy <= %s" % tr_yoy_max)
+                if netprofit_yoy:
+                    if netprofit_yoy_min:
+                        basic_indicators_stocks = basic_indicators_stocks.query("netprofit_yoy >= %s" % netprofit_yoy_min)
+                    if netprofit_yoy_max:
+                        basic_indicators_stocks = basic_indicators_stocks.query("netprofit_yoy <= %s" % netprofit_yoy_max)
+                if basic_indicators_stocks.empty:
+                    return render_template('common/stocks.html', stocks=stocks)
+
             successful = True
             start_date = pd.to_datetime(start_date).strftime('%Y%m%d')
             stocks_query = pd.DataFrame({'code': [], 'name': [], 'date': []})
@@ -137,8 +193,12 @@ def vip_dshj_cci():
                             stocks_query = stocks_query.drop_duplicates()
 
             if successful:
+
                 stocks_query = stocks_query[['code', 'name']]
                 stocks_query = stocks_query.drop_duplicates()
+                if basic_indicators:
+                    stocks_query = stocks_query.join(basic_indicators_stocks, on='code', how='inner')
+                    stocks_query = stocks_query[['code', 'name']]
                 stocks = stocks_query.to_dict(orient='records')
 
     return render_template('common/stocks.html', stocks=stocks)

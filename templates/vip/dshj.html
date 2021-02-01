@@ -69,6 +69,27 @@ function on_strategy_cci_submit() {
                 </span>
                 <br>
                 <span>
+                    <input id="roe" type="checkbox" name="roe" value="{{roe}}" checked>
+                    <input id="roe_min" type="text" name="roe_min" value="{{roe_min}}">
+                    <label> <= (净资产收益率ROE) <= </label>
+                    <input id="roe_max" type="text" name="roe_max" value="{{roe_max}}">
+                </span>
+                <br>
+                <span>
+                    <input id="tr_yoy" type="checkbox" name="tr_yoy" value="{{tr_yoy}}" checked>
+                    <input id="tr_yoy_min" type="text" name="tr_yoy_min" value="{{tr_yoy_min}}">
+                    <label> <= (营收同比增长率)   <= </label>
+                    <input id="tr_yoy_max" type="text" name="tr_yoy_max" value="{{tr_yoy_max}}">
+                </span>
+                <br>
+                <span>
+                    <input id="netprofit_yoy" type="checkbox" name="netprofit_yoy" value="{{netprofit_yoy}}" checked>
+                    <input id="netprofit_yoy_min" type="text" name="netprofit_yoy_min" value="{{netprofit_yoy_min}}">
+                    <label> <= (净利润同比增长率) <= </label>
+                    <input id="netprofit_yoy_max" type="text" name="netprofit_yoy_max" value="{{netprofit_yoy_max}}">
+                </span>
+                <br>
+                <span>
                     <label> 所有条件必须同时满足： </label>
                      是 <input id="strategy_cci_all_satisfy_yes" type="radio" name="strategy_cci_all_satisfy" value="yes" checked="checked">
                      否 <input id="strategy_cci_all_satisfy_no" type="radio" name="strategy_cci_all_satisfy" value="no">
