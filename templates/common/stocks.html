@@ -36,8 +36,9 @@
         <td>{{stock.code}}</td>
         <td>{{stock.name}}</td>
         <td>
-            <br><a href="http://quote.eastmoney.com/{{stock.code|stock_code_normalizer}}.html">东方财富</a>
-            <br><a href="https://xueqiu.com/S/{{stock.code|stock_code_normalizer}}">雪球</a>
+            <br><a href="http://quote.eastmoney.com/{{stock.code|stock_code_normalizer}}.html" target="_blank">东方财富</a>
+            <br>
+            <br><a href="https://xueqiu.com/S/{{stock.code|stock_code_normalizer}}" target="_blank">雪球</a>
         </td>
     </tr>
     {% endfor %}
