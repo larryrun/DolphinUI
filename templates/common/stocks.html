@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CCI策略</title>
+    <style>
+        form span {
+            margin-left: 10px;
+        }
+        #valueInput {
+            text-align: right;
+        }
+        #errorMsg {
+            color: red;
+        }
+        #resultTable {
+            border-collapse: collapse;
+        }
+        #resultTable td {
+            border: 1px solid;
+            padding: 4px 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<table id="resultTable">
+    <tbody>
+    <tr>
+        <td>代码</td>
+        <td>基本信息</td>
+        <td>查看</td>
+    </tr>
+    {% for stock in stocks %}
+    <tr>
+        <td>{{stock.code}}</td>
+        <td>{{stock.name}}</td>
+        <td>
+            <br><a href="http://quote.eastmoney.com/{{stock.code|stock_code_normalizer}}.html" target="_blank">东方财富</a>
+            <br>
+            <br><a href="https://xueqiu.com/S/{{stock.code|stock_code_normalizer}}" target="_blank">雪球</a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

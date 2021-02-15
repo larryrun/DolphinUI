@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>东山海景专属策略</title>
+    <style>
+        form span {
+            margin-left: 10px;
+        }
+        #valueInput {
+            text-align: right;
+        }
+        #errorMsg {
+            color: red;
+        }
+        #strategy {
+            border-collapse: collapse;
+        }
+        #strategy td {
+            border: 1px solid;
+            padding: 4px 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<script>
+function on_strategy_cci_submit() {
+  document.body.style.cursor = 'wait'
+  document.getElementById('strategy_cci').submit();
+}
+</script>
+<body>
+<table id="strategy">
+    <tbody>
+    <tr>
+        <td>策略</td>
+        <td>参数</td>
+        <td>查询</td>
+    </tr>
+    <tr>
+        <td>CCI策略</td>
+        <td>
+            <form id="strategy_cci" method="post" action="dshj_cci">
+                <br>
+                <span>
+                    <label for="strategy_cci_date"> 起始日期 </label>
+                    <input id="strategy_cci_date" type="date" name="strategy_cci_date" value="{{strategy_cci_date}}">
+                </span>
+                <br>
+                <span>
+                    <input id="strategy_cci_daily" type="checkbox" name="strategy_cci_daily" value="{{strategy_cci_daily}}" checked>
+                    <input id="strategy_cci_daily_min" type="text" name="strategy_cci_daily_min" value="{{strategy_cci_daily_min}}">
+                    <label> <= (日线CCI) <= </label>
+                    <input id="strategy_cci_daily_max" type="text" name="strategy_cci_daily_max" value="{{strategy_cci_daily_max}}">
+                </span>
+                <br>
+                <span>
+                    <input id="strategy_cci_weekly" type="checkbox" name="strategy_cci_weekly" value="{{strategy_cci_weekly}}" checked>
+                    <input id="strategy_cci_weekly_min" type="text" name="strategy_cci_weekly_min" value="{{strategy_cci_weekly_min}}">
+                    <label> <= (周线CCI) <= </label>
+                    <input id="strategy_cci_weekly_max" type="text" name="strategy_cci_weekly_max" value="{{strategy_cci_weekly_max}}">
+                </span>
+                <br>
+                <span>
+                    <input id="strategy_cci_monthly" type="checkbox" name="strategy_cci_monthly" value="{{strategy_cci_monthly}}" checked>
+                    <input id="strategy_cci_monthly_min" type="text" name="strategy_cci_monthly_min" value="{{strategy_cci_monthly_min}}">
+                    <label> <= (月线CCI) <= </label>
+                    <input id="strategy_cci_monthly_max" type="text" name="strategy_cci_monthly_max" value="{{strategy_cci_monthly_max}}">
+                </span>
+                <br>
+                <span>
+                    <input id="strategy_cci_quarterly" type="checkbox" name="strategy_cci_quarterly" value="{{strategy_cci_quarterly}}" checked>
+                    <input id="strategy_cci_quarterly_min" type="text" name="strategy_cci_quarterly_min" value="{{strategy_cci_quarterly_min}}">
+                    <label> <= (季线CCI) <= </label>
+                    <input id="strategy_cci_quarterly_max" type="text" name="strategy_cci_quarterly_max" value="{{strategy_cci_quarterly_max}}">
+                </span>
+                <br>
+                <span>
+                    <input id="roe" type="checkbox" name="roe" value="{{roe}}" checked>
+                    <input id="roe_min" type="text" name="roe_min" value="{{roe_min}}">
+                    <label> <= (净资产收益率ROE) <= </label>
+                    <input id="roe_max" type="text" name="roe_max" value="{{roe_max}}">
+                </span>
+                <br>
+                <span>
+                    <input id="tr_yoy" type="checkbox" name="tr_yoy" value="{{tr_yoy}}" checked>
+                    <input id="tr_yoy_min" type="text" name="tr_yoy_min" value="{{tr_yoy_min}}">
+                    <label> <= (营收同比增长率)   <= </label>
+                    <input id="tr_yoy_max" type="text" name="tr_yoy_max" value="{{tr_yoy_max}}">
+                </span>
+                <br>
+                <span>
+                    <input id="netprofit_yoy" type="checkbox" name="netprofit_yoy" value="{{netprofit_yoy}}" checked>
+                    <input id="netprofit_yoy_min" type="text" name="netprofit_yoy_min" value="{{netprofit_yoy_min}}">
+                    <label> <= (净利润同比增长率) <= </label>
+                    <input id="netprofit_yoy_max" type="text" name="netprofit_yoy_max" value="{{netprofit_yoy_max}}">
+                </span>
+                <br>
+                <span>
+                    <label> 所有条件必须同时满足： </label>
+                     是 <input id="strategy_cci_all_satisfy_yes" type="radio" name="strategy_cci_all_satisfy" value="yes" checked="checked">
+                     否 <input id="strategy_cci_all_satisfy_no" type="radio" name="strategy_cci_all_satisfy" value="no">
+                </span>
+            </form>
+        </td>
+        <td>
+            <span>
+                <input id="strategy_cci_submit" type="button" value="执行" onclick="on_strategy_cci_submit()">
+            </span>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>
