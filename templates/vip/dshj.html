@@ -40,7 +40,7 @@ function on_strategy_cci_submit() {
     <tr>
         <td>CCI策略</td>
         <td>
-            <form id="strategy_cci" target="_blank" method="post" action="dshj_cci">
+            <form id="strategy_cci" method="post" action="dshj_cci">
                 <br>
                 <span>
                     <label for="strategy_cci_date"> 起始日期 </label>
@@ -66,6 +66,13 @@ function on_strategy_cci_submit() {
                     <input id="strategy_cci_monthly_min" type="text" name="strategy_cci_monthly_min" value="{{strategy_cci_monthly_min}}">
                     <label> <= (月线CCI) <= </label>
                     <input id="strategy_cci_monthly_max" type="text" name="strategy_cci_monthly_max" value="{{strategy_cci_monthly_max}}">
+                </span>
+                <br>
+                <span>
+                    <input id="strategy_cci_quarterly" type="checkbox" name="strategy_cci_quarterly" value="{{strategy_cci_quarterly}}" checked>
+                    <input id="strategy_cci_quarterly_min" type="text" name="strategy_cci_quarterly_min" value="{{strategy_cci_quarterly_min}}">
+                    <label> <= (季线CCI) <= </label>
+                    <input id="strategy_cci_quarterly_max" type="text" name="strategy_cci_quarterly_max" value="{{strategy_cci_quarterly_max}}">
                 </span>
                 <br>
                 <span>

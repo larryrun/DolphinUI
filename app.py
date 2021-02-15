@@ -6,7 +6,7 @@ import pandas as pd
 
 app = Flask(__name__)
 
-database_client = DatabaseClient()
+database_client = DatabaseClient(dev=False)
 
 
 @app.template_filter('stock_code_normalizer')
@@ -29,6 +29,9 @@ def vip_dshj():
                            strategy_cci_monthly='on',
                            strategy_cci_monthly_min=100,
                            strategy_cci_monthly_max=380,
+                           strategy_cci_quarterly='on',
+                           strategy_cci_quarterly_min=100,
+                           strategy_cci_quarterly_max=380,
                            roe='on',
                            roe_min=5,
                            roe_max='',
@@ -56,6 +59,9 @@ def vip_dshj_cci():
         monthly_cci = ("on" == request.form.get('strategy_cci_monthly', ""))
         monthly_cci_min = request.form.get('strategy_cci_monthly_min', None)
         monthly_cci_max = request.form.get('strategy_cci_monthly_max', None)
+        quarterly_cci = ("on" == request.form.get('strategy_cci_quarterly', ""))
+        quarterly_cci_min = request.form.get('strategy_cci_quarterly_min', None)
+        quarterly_cci_max = request.form.get('strategy_cci_quarterly_max', None)
 
         roe = ("on" == request.form.get('roe', ""))
         roe_min = request.form.get('roe_min', None)
@@ -83,6 +89,9 @@ def vip_dshj_cci():
                                         'monthly_cci': monthly_cci,
                                         'monthly_cci_min': monthly_cci_min,
                                         'monthly_cci_max': monthly_cci_max,
+                                        'quarterly_cci': quarterly_cci,
+                                        'quarterly_cci_min': quarterly_cci_min,
+                                        'quarterly_cci_max': quarterly_cci_max,
                                         'roe': roe,
                                         'roe_min': roe_min,
                                         'roe_max': roe_max,
@@ -110,6 +119,16 @@ def vip_dshj_cci():
                 else:
                     return datetime.date(date.year, date.month, 29 if date.year % 4 == 0 else 28)
 
+            def end_of_quarter(date):
+                if date.month <= 3:
+                    return datetime.date(date.year, 3, 31)
+                elif date.month <= 6:
+                    return datetime.date(date.year, 6, 30)
+                elif date.month <= 9:
+                    return datetime.date(date.year, 9, 30)
+                else:
+                    return datetime.date(date.year, 12, 31)
+
             def min_max_range(min, max):
                 if min and max:
                     return (min, max)
@@ -121,15 +140,21 @@ def vip_dshj_cci():
                     return None
 
             strategies = [
-                (daily_cci,   'Daily_CCI_14',   daily_cci_min,   daily_cci_max,   end_of_week),
-                (weekly_cci,  'Weekly_CCI_14',  weekly_cci_min,  weekly_cci_max,  end_of_month),
-                (monthly_cci, 'Monthly_CCI_14', monthly_cci_min, monthly_cci_max, None)
+                (daily_cci,     'Daily_CCI_14',     daily_cci_min,     daily_cci_max,     end_of_week),
+                (weekly_cci,    'Weekly_CCI_14',    weekly_cci_min,    weekly_cci_max,    end_of_month),
+                (monthly_cci,   'Monthly_CCI_14',   monthly_cci_min,   monthly_cci_max,   end_of_quarter),
+                (quarterly_cci, 'Quarterly_CCI_14', quarterly_cci_min, quarterly_cci_max, None)
             ]
 
             date = datetime.date.today() + datetime.timedelta(days=-365)
             sql = "SELECT code, name FROM Dolphin.StockBasic WHERE list >= '%s'" % (date.strftime('%Y%m%d'))
-            sub_new_stocks = pd.read_sql_query(sql, database_client.get_engine())
-            sub_new_stocks.set_index('code', inplace=True)
+            sub_monthly_new_stocks = pd.read_sql_query(sql, database_client.get_engine())
+            sub_monthly_new_stocks.set_index('code', inplace=True)
+
+            date = datetime.date.today() + datetime.timedelta(days=-1278)
+            sql = "SELECT code, name FROM Dolphin.StockBasic WHERE list >= '%s'" % (date.strftime('%Y%m%d'))
+            sub_quarterly_new_stocks = pd.read_sql_query(sql, database_client.get_engine())
+            sub_quarterly_new_stocks.set_index('code', inplace=True)
 
             basic_indicators_stocks = pd.DataFrame()
             basic_indicators = roe or tr_yoy or netprofit_yoy
@@ -171,7 +196,14 @@ def vip_dshj_cci():
                         if 'Monthly_CCI_14' == metric and not stocks_query.empty:
                             stocks_query_copy = stocks_query.copy()
                             stocks_query_copy.set_index('code', inplace=True)
-                            stocks_joint = stocks_query_copy.join(sub_new_stocks, how="inner", rsuffix='_r')
+                            stocks_joint = stocks_query_copy.join(sub_monthly_new_stocks, how="inner", rsuffix='_r')
+                            stocks_joint.reset_index(inplace=True)
+                            if not stocks_joint.empty:
+                                query = query.append(stocks_joint[['code', 'name', 'date']])
+                        if 'Quarterly_CCI_14' == metric and not stocks_query.empty:
+                            stocks_query_copy = stocks_query.copy()
+                            stocks_query_copy.set_index('code', inplace=True)
+                            stocks_joint = stocks_query_copy.join(sub_quarterly_new_stocks, how="inner", rsuffix='_r')
                             stocks_joint.reset_index(inplace=True)
                             if not stocks_joint.empty:
                                 query = query.append(stocks_joint[['code', 'name', 'date']])

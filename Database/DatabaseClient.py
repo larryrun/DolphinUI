@@ -5,8 +5,8 @@ import pandas as pd
 
 class DatabaseClient(object):
 
-    def __init__(self):
-        self.engine = DatabaseEngine()
+    def __init__(self, dev=False):
+        self.engine = DatabaseEngine(dev)
 
     def get_engine(self):
         return self.engine.get_engine()
