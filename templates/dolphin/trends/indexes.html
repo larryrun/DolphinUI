@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>指数</title>
+    <style>
+        form span {
+            margin-left: 10px;
+        }
+        #valueInput {
+            text-align: right;
+        }
+        #errorMsg {
+            color: red;
+        }
+        #resultTable {
+            border-collapse: collapse;
+        }
+        #resultTable td {
+            border: 1px solid;
+            padding: 4px 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<table id="resultTable">
+    <tbody>
+    <tr>
+        <td>代码</td>
+        <td>名称</td>
+        <td>趋势</td>
+        <td>优质股</td>
+        <td>详情</td>
+    </tr>
+    {% for index in indexes %}
+    <tr>
+        <td>{{index.code}}</td>
+        <td>{{index.name}}</td>
+        <td>{{index.trend}}</td>
+        <td>
+            <ul>
+            {% for code in index.rank %}
+                <li><a href="http://quote.eastmoney.com/{{code|stock_code_normalizer}}.html" target="_blank">{{code}}</a></li>
+            {% endfor %}
+            </ul>
+        </td>
+        <td>
+            <br><a href="/dolphin/indexes/members?index={{index.code}}" target="_blank">查看</a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

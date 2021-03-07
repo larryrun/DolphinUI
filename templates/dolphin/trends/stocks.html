@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>股票</title>
+    <style>
+        form span {
+            margin-left: 10px;
+        }
+        #valueInput {
+            text-align: right;
+        }
+        #errorMsg {
+            color: red;
+        }
+        #resultTable {
+            border-collapse: collapse;
+        }
+        #resultTable td {
+            border: 1px solid;
+            padding: 4px 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<span>参考过去至少{{years}}年历史，未来{{days}}天的同期走势</span>
+<table id="resultTable">
+    <tbody>
+    <tr>
+        <td>代码</td>
+        <td>名称</td>
+        <td>趋势</td>
+        <td>排名</td>
+    </tr>
+    {% for stock in stocks %}
+    <tr>
+        <td>{{stock.code}}</td>
+        <td><a href="http://quote.eastmoney.com/{{stock.code|stock_code_normalizer}}.html" target="_blank">{{stock.name}}</a></td>
+        <td>{{stock.trend}}</td>
+        <td><a href="/dolphin/indexes/members?code={{stock.code}}">查看</a></td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

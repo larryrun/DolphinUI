@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>成分股</title>
+    <style>
+        form span {
+            margin-left: 10px;
+        }
+        #valueInput {
+            text-align: right;
+        }
+        #errorMsg {
+            color: red;
+        }
+        #resultTable {
+            border-collapse: collapse;
+        }
+        #resultTable td {
+            border: 1px solid;
+            padding: 4px 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+<span>指数：<label>{{index.code}} - {{index.name}}</label></span>
+<br>
+<span>目标股：<label>{{code}}</label></span>
+<table id="resultTable">
+    <tbody>
+    <tr>
+        <td>代码</td>
+        <td>名称</td>
+        <td>评估</td>
+        <td>基本面</td>
+        <td>详情</td>
+    </tr>
+    {% for member in members %}
+    <tr>
+        <td>{{member.code}}</td>
+        <td>{{member.name}}</td>
+        <td>
+            偿债:{{member.score.DebtPay}}, 运营:{{member.score.Operate}}, 盈利:{{member.score.Profit}}, 发展:{{member.score.Growth}}, 现金流:{{member.score.CashFlow}}, 综合绩效:{{member.score.General}}, 景气:{{member.score.Booming}}, 异常:{{member.score.Anomaly}}, 总得分:{{member.score.Summary}}
+        </td>
+        <td>
+            <ul>
+                <li>相对排名: {{member.ranking1}}</li>
+                <li>综合排名: {{member.ranking2}}</li>
+            </ul>
+        </td>
+        <td>
+            <a href="http://quote.eastmoney.com/{{member.code|stock_code_normalizer}}.html" target="_blank">查看</a>
+        </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>
