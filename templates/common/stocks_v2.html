@@ -39,9 +39,7 @@
         <td>{{stock.name}}</td>
         <td><a href="/dolphin/indexes/members?code={{stock.code}}" target="_blank">查看</a></td>
         <td>
-            <br><a href="http://quote.eastmoney.com/{{stock.code|stock_code_normalizer}}.html" target="_blank">东方财富</a>
-            <br>
-            <br><a href="https://xueqiu.com/S/{{stock.code|stock_code_normalizer}}" target="_blank">雪球</a>
+            <a href="http://quote.eastmoney.com/{{stock.code|stock_code_normalizer}}.html" target="_blank">东方财富</a>
         </td>
     </tr>
     {% endfor %}

@@ -7,7 +7,7 @@ import numpy as np
 
 app = Flask(__name__)
 
-database_client = DatabaseClient(dev=False)
+database_client = DatabaseClient(dev=True)
 
 global_cache_finance_indicators = {}
 
@@ -15,6 +15,31 @@ global_cache_finance_indicators = {}
 @app.template_filter('stock_code_normalizer')
 def stock_code_normalizer(code):
     return code[-2:] + code[:-3]
+
+
+@app.route('/vip/kewpie')
+def vip_kewpie():
+    start = datetime.date.today() + datetime.timedelta(days=45)
+    end = start + datetime.timedelta(days=45)
+    start = start.strftime('%Y-%m-%d')
+    end = end.strftime('%Y-%m-%d')
+    return render_template('vip/kewpie.html',
+                           strategy_history_index_trend_begin=start,
+                           strategy_history_index_trend_end=end)
+
+
+@app.route('/vip/kewpie_zsqs', methods=['GET', 'POST'])
+def vip_kewpie_zsqs():
+    indexes_with_ranks = []
+    if request.method == 'POST':
+        date_from = request.form.get('strategy_history_index_trend_begin', '')
+        date_to = request.form.get('strategy_history_index_trend_end', '')
+        if date_from and date_to:
+            date_from = pd.to_datetime(date_from)
+            date_to = pd.to_datetime(date_to)
+            indexes_with_ranks = get_indexes_trends(date_from, date_to)
+    return render_template('dolphin/trends/indexes.html',
+                           indexes=indexes_with_ranks)
 
 
 @app.route('/vip/eric')
@@ -216,7 +241,9 @@ def vip_dshj():
                            tr_yoy_max='',
                            netprofit_yoy='on',
                            netprofit_yoy_min=5,
-                           netprofit_yoy_max='')
+                           netprofit_yoy_max='',
+                           exclude_st='on',
+                           exclude_suspended='on')
 
 
 @app.route('/vip/dshj_cci', methods=['GET', 'POST'])
@@ -249,6 +276,9 @@ def vip_dshj_cci():
         netprofit_yoy_min = request.form.get('netprofit_yoy_min', None)
         netprofit_yoy_max = request.form.get('netprofit_yoy_max', None)
 
+        exclude_st = ("on" == request.form.get('exclude_st', ""))
+        exclude_suspended = ("on" == request.form.get('exclude_suspended', ""))
+
         all_satisfy = ("yes" == request.form.get('strategy_cci_all_satisfy', ""))
         start_date = request.form.get('strategy_cci_date', None)
 
@@ -277,6 +307,8 @@ def vip_dshj_cci():
                                         'netprofit_yoy': netprofit_yoy,
                                         'netprofit_yoy_min': netprofit_yoy_min,
                                         'netprofit_yoy_max': netprofit_yoy_max,
+                                        'exclude_st': exclude_st,
+                                        'exclude_suspended': exclude_suspended,
                                         'all_satisfy': all_satisfy,
                                         'start_date': start_date
                                     })]})
@@ -330,7 +362,16 @@ def vip_dshj_cci():
             date = datetime.date.today() + datetime.timedelta(days=-1278)
             sql = "SELECT code, name FROM Dolphin.StockBasic WHERE list >= '%s'" % (date.strftime('%Y%m%d'))
             sub_quarterly_new_stocks = pd.read_sql_query(sql, database_client.get_engine())
+            sub_quarterly_new_stocks_copy = sub_quarterly_new_stocks.copy()
             sub_quarterly_new_stocks.set_index('code', inplace=True)
+
+            exclude_stocks = pd.DataFrame()
+            sql_not_suspended = " STATUS = 'L' " if exclude_suspended else " (1 = 1) "
+            sql_not_st = """ NAME NOT LIKE '%%ST%%' """ if exclude_st else " (1 = 1) "
+            sql = "SELECT code, name FROM Dolphin.StockBasic WHERE %s AND %s " % (sql_not_st, sql_not_suspended)
+            if exclude_st or exclude_suspended:
+                exclude_stocks = pd.read_sql_query(sql, database_client.get_engine())
+                exclude_stocks.set_index('code', inplace=True)
 
             basic_indicators_stocks = pd.DataFrame()
             basic_indicators = roe or tr_yoy or netprofit_yoy
@@ -401,9 +442,11 @@ def vip_dshj_cci():
                             stocks_query = stocks_query.drop_duplicates()
 
             if successful:
-
                 stocks_query = stocks_query[['code', 'name']]
                 stocks_query = stocks_query.drop_duplicates()
+                if not exclude_stocks.empty:
+                    stocks_query = stocks_query.join(exclude_stocks, on='code', how='inner', rsuffix='_r')
+                    stocks_query = stocks_query[['code', 'name']]
                 if basic_indicators:
                     stocks_query = stocks_query.join(basic_indicators_stocks, on='code', how='inner')
                     stocks_query = stocks_query[['code', 'name']]
@@ -437,7 +480,7 @@ def get_stocks_trends():
 
 
 @app.route('/dolphin/trends/indexes', methods=['GET'])
-def get_indexes_trends():
+def dolphin_trends_indexes():
     sql = "SELECT code, name FROM IndexBasic WHERE MARKET = 'SW' AND CATEGORY = '二级行业指数'"
     indexes = pd.read_sql_query(sql, database_client.get_engine())
     indexes.set_index('code', drop=True, inplace=True)
@@ -467,6 +510,36 @@ def get_indexes_trends():
             indexes_with_ranks.append(index_with_ranks)
     return render_template('dolphin/trends/indexes.html',
                            indexes=indexes_with_ranks)
+
+
+def get_indexes_trends(date_from, date_to):
+    sql = "SELECT code, name FROM IndexBasic WHERE MARKET = 'SW' AND CATEGORY = '二级行业指数'"
+    indexes = pd.read_sql_query(sql, database_client.get_engine())
+    indexes.set_index('code', drop=True, inplace=True)
+    date_from_str = date_from.strftime('%m%d')
+    date_to_str = date_to.strftime('%m%d')
+    trend = get_history_trend('WeeklyIndex', code=None, date_from=date_from_str, date_to=date_to_str)
+    date_from = pd.datetime.today() + pd.Timedelta(days=-92 * 6)
+    index_members_with_rank = get_index_members_with_rank(indexes.index, date_from=date_from)
+    indexes_with_ranks = []
+    for index in trend.index:
+        if index in indexes.index:
+            trend_ = trend.query("code == '%s'" % index)
+            index_with_ranks = {
+                'code': index,
+                'name': indexes.name[index],
+                'trend': '参考历史%d年的同期（%s ~ %s）表现, 胜率: %.2f%%, 涨幅（均）: %.2f%%, 方差: %.2f%%, 高位（均）: %.2f%%, 低位（均）: %.2f%%' %
+                         (trend_['years'].iat[0], date_from_str, date_to_str, trend_['win_rate'].iat[0], trend_['win_pct_mean'].iat[0],
+                          trend_['win_pct_std'].iat[0], trend_['win_max_mean'].iat[0], trend_['win_min_mean'].iat[0])
+            }
+            if index in index_members_with_rank:
+                narrow_rank = index_members_with_rank[index]['narrow_spectrum_rank']
+                broad_rank = index_members_with_rank[index]['broad_spectrum_rank']
+                rank = set([x['code'] for x in narrow_rank[:2]]) | set([x['code'] for x in broad_rank[:2]]) | \
+                      (set([x['code'] for x in narrow_rank[:5]]) & set([x['code'] for x in broad_rank[:5]]))
+                index_with_ranks['rank'] = rank
+            indexes_with_ranks.append(index_with_ranks)
+    return indexes_with_ranks
 
 
 def get_history_trend(table, code, date_from, date_to, year_from=None):
@@ -541,9 +614,10 @@ def get_index_members():
     if code:
         index, indexes, members = get_index_members_by_code(code)
         if index:
+            member = members.query("code == '%s'" % code)
             return render_template('dolphin/indexes/members.html',
                                    index={'code': index, 'name': indexes.name[index]},
-                                   code=code,
+                                   stock={'code': code, 'ranking1': member.ranking1.iat[0], 'ranking2': member.ranking2.iat[0]},
                                    members=members.to_dict(orient='records'))
     return render_template('common/404.html')
 

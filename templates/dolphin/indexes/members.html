@@ -25,8 +25,9 @@
 </head>
 <body>
 <span>指数：<label>{{index.code}} - {{index.name}}</label></span>
-<br>
-<span>目标股：<label>{{code}}</label></span>
+{% if stock %}
+<br><span><label>目标：{{stock.code}} [相对: {{stock.ranking1}}, 综合: {{stock.ranking2}}]</label></span>
+{% endif %}
 <table id="resultTable">
     <tbody>
     <tr>
@@ -41,12 +42,12 @@
         <td>{{member.code}}</td>
         <td>{{member.name}}</td>
         <td>
-            偿债:{{member.score.DebtPay}}, 运营:{{member.score.Operate}}, 盈利:{{member.score.Profit}}, 发展:{{member.score.Growth}}, 现金流:{{member.score.CashFlow}}, 综合绩效:{{member.score.General}}, 景气:{{member.score.Booming}}, 异常:{{member.score.Anomaly}}, 总得分:{{member.score.Summary}}
+            偿债:{{member.score.DebtPay}}, 运营:{{member.score.Operate}}, 盈利:{{member.score.Profit}}, 发展:{{member.score.Growth}}, 现金流:{{member.score.CashFlow}}, 综合绩效:{{member.score.General}}, 唐氏:{{member.score.MrTang}}, 景气:{{member.score.Booming}}, 异常:{{member.score.Anomaly}}, 总得分:{{member.score.Summary}}
         </td>
         <td>
             <ul>
-                <li>相对排名: {{member.ranking1}}</li>
-                <li>综合排名: {{member.ranking2}}</li>
+                <li>相对: {{member.ranking1}}</li>
+                <li>综合: {{member.ranking2}}</li>
             </ul>
         </td>
         <td>

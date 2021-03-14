@@ -43,7 +43,7 @@ class FIBBuilder(object):
                   'Growth':   self.get_growth_score(indicators),
                   'CashFlow': self.get_cashflow_score(indicators),
                   'General':  self.get_general_score(indicators),
-                  'Mr.Tang':  self.get_mr_tang_score(indicators),
+                  'MrTang':  self.get_mr_tang_score(indicators),
                   'Booming':  self.get_booming_score(indicators),
                   'Anomaly':  self.get_anomaly_score(indicators)
                   }

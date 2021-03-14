@@ -40,7 +40,7 @@ function on_strategy_cci_submit() {
     <tr>
         <td>CCI策略</td>
         <td>
-            <form id="strategy_cci" method="post" action="dshj_cci">
+            <form id="strategy_cci" method="post" action="dshj_cci" target="_blank">
                 <br>
                 <span>
                     <label for="strategy_cci_date"> 起始日期 </label>
@@ -94,6 +94,16 @@ function on_strategy_cci_submit() {
                     <input id="netprofit_yoy_min" type="text" name="netprofit_yoy_min" value="{{netprofit_yoy_min}}">
                     <label> <= (净利润同比增长率) <= </label>
                     <input id="netprofit_yoy_max" type="text" name="netprofit_yoy_max" value="{{netprofit_yoy_max}}">
+                </span>
+                <br>
+                <span>
+                    <input id="exclude_st" type="checkbox" name="exclude_st" value="{{exclude_st}}" checked>
+                    <label> 排除ST股 </label>
+                </span>
+                <br>
+                <span>
+                    <input id="exclude_suspended" type="checkbox" name="exclude_suspended" value="{{exclude_suspended}}" checked>
+                    <label> 排除停牌股 </label>
                 </span>
                 <br>
                 <span>
