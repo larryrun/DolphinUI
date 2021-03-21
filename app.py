@@ -7,7 +7,7 @@ import numpy as np
 
 app = Flask(__name__)
 
-database_client = DatabaseClient(dev=True)
+database_client = DatabaseClient(dev=False)
 
 global_cache_finance_indicators = {}
 
@@ -242,6 +242,9 @@ def vip_dshj():
                            netprofit_yoy='on',
                            netprofit_yoy_min=5,
                            netprofit_yoy_max='',
+                           peg='on',
+                           peg_min=0,
+                           peg_max='',
                            exclude_st='on',
                            exclude_suspended='on')
 
@@ -275,6 +278,9 @@ def vip_dshj_cci():
         netprofit_yoy = ("on" == request.form.get('netprofit_yoy', ""))
         netprofit_yoy_min = request.form.get('netprofit_yoy_min', None)
         netprofit_yoy_max = request.form.get('netprofit_yoy_max', None)
+        peg = ("on" == request.form.get('peg', ""))
+        peg_min = request.form.get('peg_min', None)
+        peg_max = request.form.get('peg_max', None)
 
         exclude_st = ("on" == request.form.get('exclude_st', ""))
         exclude_suspended = ("on" == request.form.get('exclude_suspended', ""))
@@ -307,6 +313,9 @@ def vip_dshj_cci():
                                         'netprofit_yoy': netprofit_yoy,
                                         'netprofit_yoy_min': netprofit_yoy_min,
                                         'netprofit_yoy_max': netprofit_yoy_max,
+                                        'peg': peg,
+                                        'peg_min': peg_min,
+                                        'peg_max': peg_max,
                                         'exclude_st': exclude_st,
                                         'exclude_suspended': exclude_suspended,
                                         'all_satisfy': all_satisfy,
@@ -362,7 +371,6 @@ def vip_dshj_cci():
             date = datetime.date.today() + datetime.timedelta(days=-1278)
             sql = "SELECT code, name FROM Dolphin.StockBasic WHERE list >= '%s'" % (date.strftime('%Y%m%d'))
             sub_quarterly_new_stocks = pd.read_sql_query(sql, database_client.get_engine())
-            sub_quarterly_new_stocks_copy = sub_quarterly_new_stocks.copy()
             sub_quarterly_new_stocks.set_index('code', inplace=True)
 
             exclude_stocks = pd.DataFrame()
@@ -399,6 +407,23 @@ def vip_dshj_cci():
                         basic_indicators_stocks = basic_indicators_stocks.query("netprofit_yoy <= %s" % netprofit_yoy_max)
                 if basic_indicators_stocks.empty:
                     return render_template('common/stocks.html', stocks=stocks)
+
+            boost_indicators_stocks = pd.DataFrame()
+            boost_indicators = peg
+            if boost_indicators:
+                sql = """
+                    SELECT b.code, b.date, b.peg FROM Dolphin.FinanceIndicatorsBoost b, (
+                      SELECT code, max(date) as date FROM Dolphin.FinanceIndicatorsBoost GROUP BY CODE
+                    ) c
+                    WHERE b.code = c.code AND b.date = c.date
+                """
+                boost_indicators_stocks = pd.read_sql_query(sql, database_client.get_engine())
+                boost_indicators_stocks.set_index('code', inplace=True, drop=True)
+                if peg:
+                    if peg_min:
+                        boost_indicators_stocks = boost_indicators_stocks.query("peg >= %s" % peg_min)
+                    if peg_max:
+                        boost_indicators_stocks = boost_indicators_stocks.query("peg <= %s" % peg_max)
 
             successful = True
             start_date = pd.to_datetime(start_date).strftime('%Y%m%d')
@@ -448,7 +473,10 @@ def vip_dshj_cci():
                     stocks_query = stocks_query.join(exclude_stocks, on='code', how='inner', rsuffix='_r')
                     stocks_query = stocks_query[['code', 'name']]
                 if basic_indicators:
-                    stocks_query = stocks_query.join(basic_indicators_stocks, on='code', how='inner')
+                    stocks_query = stocks_query.join(basic_indicators_stocks, on='code', how='inner', rsuffix='_r')
+                    stocks_query = stocks_query[['code', 'name']]
+                if boost_indicators:
+                    stocks_query = stocks_query.join(boost_indicators_stocks, on='code', how='inner', rsuffix='_r')
                     stocks_query = stocks_query[['code', 'name']]
                 stocks = stocks_query.to_dict(orient='records')
 

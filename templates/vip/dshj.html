@@ -97,6 +97,13 @@ function on_strategy_cci_submit() {
                 </span>
                 <br>
                 <span>
+                    <input id="peg" type="checkbox" name="peg" value="{{peg}}" checked>
+                    <input id="peg_min" type="text" name="peg_min" value="{{peg_min}}">
+                    <label> <= (PEG) <= </label>
+                    <input id="peg_max" type="text" name="peg_max" value="{{peg_max}}">
+                </span>
+                <br>
+                <span>
                     <input id="exclude_st" type="checkbox" name="exclude_st" value="{{exclude_st}}" checked>
                     <label> 排除ST股 </label>
                 </span>

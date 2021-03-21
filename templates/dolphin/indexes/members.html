@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="UTF-8">
     <title>成分股</title>
@@ -26,7 +26,7 @@
 <body>
 <span>指数：<label>{{index.code}} - {{index.name}}</label></span>
 {% if stock %}
-<br><span><label>目标：{{stock.code}} [相对: {{stock.ranking1}}, 综合: {{stock.ranking2}}]</label></span>
+<br><span><label>目标：{{stock.code}} [相对: {{stock.ranking1}}, 综合: {{stock.ranking2}}] / 总数: {{members|length}}</label></span>
 {% endif %}
 <table id="resultTable">
     <tbody>
@@ -57,5 +57,14 @@
     {% endfor %}
     </tbody>
 </table>
+<span>
+    成分股清单：
+    <br>
+    [
+        {% for member in members %}
+        '{{member.code}}',
+        {% endfor %}
+    ]
+</span>
 </body>
 </html>
